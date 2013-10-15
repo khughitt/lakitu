@@ -24,6 +24,13 @@ class Lakitu(object):
         """Creates a new Lakitu daemon instance"""
         self._client = self.connect()
 
+        # Load initial initial tracklist
+        feed = self._client.get('/me/activities')
+
+        self._playlist = [x for x in feed.collection if x['type'] == 'track']
+        self._next_href = feed.next_href
+        self._future_href = feed.future_href
+
     def connect(self):
         """Connects to SoundCloud"""
         password = getpass.getpass()
@@ -35,12 +42,15 @@ class Lakitu(object):
                                    password=password)
         return client
 
+    def get_tracklist(self):
+        """Returns a list of tracks currently queued up"""
+        return self._playlist
+
     def play(self):
         """Begin playing a user's audio stream"""
-        latest = self._client.get('/me/activities')
-        print("Playing " + latest.collection[0]['origin']['title'])
+        print("Playing " + self._playlist[0]['origin']['title'])
 
-        track = self._client.get(latest.collection[0]['origin']['uri'])
+        track = self._client.get(self._playlist[0]['origin']['uri'])
         stream_url = self._client.get(track.stream_url, allow_redirects=False)
 
         #mainloop = gobject.MainLoop()
@@ -56,6 +66,7 @@ with warnings.catch_warnings():
     daemon = Pyro4.Daemon()
     uri = daemon.register(lakitu)
     print("Started Pyro instance at %s" % daemon.locationStr)
+    print("uri: %s" % uri)
     lakitu.play()
     daemon.requestLoop()
 

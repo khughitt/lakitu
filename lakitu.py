@@ -5,23 +5,41 @@ Lakitu SoundCloud client
 2013/10/14
 """
 import sys
+import locale
 import curses
+import curses.wrapper
+import Pyro4.core
 
-screen = curses.initscr()
-curses.start_color()
-curses.noecho()
-curses.cbreak()
-screen.keypad(1)
+def main(screen):
+    """Main"""
+    # Set locale
+    locale.setlocale(locale.LC_ALL, '')
+    code = locale.getpreferredencoding()
 
-# Main loop
-while 1:
-    c = screen.getch()
-    if c == ord('n'):
-        screen.addstr("Next track", curses.color_pair(2))
-    elif c == ord('q'):
-        curses.nocbreak()
-        screen.keypad(0)
-        curses.echo()
-        curses.endwin()
-        sys.exit()
+    curses.start_color()
+    curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_BLUE) 
+    curses.init_pair(2, curses.COLOR_MAGENTA, curses.COLOR_MAGENTA)
 
+    # connect to pyro
+    lakitu = Pyro4.Proxy("PYRO:obj_4de199546055459ca9b650f3f2d340e0@localhost:44148")
+
+    # load tracklist
+    playlist = lakitu.get_tracklist()
+    for track in playlist:
+        text = track['origin']['title'].encode(code)
+        screen.addstr(text, curses.color_pair(0))
+        #screen.addstr("\n")
+
+    #screen.bkgd(curses.color_pair(1))
+    screen.refresh()
+
+    # Main loop
+    while 1:
+        c = screen.getch()
+        if c == ord('n'):
+            screen.addstr("Next track", curses.color_pair(2))
+        elif c == ord('q'):
+            break
+
+if __name__ == "__main__":
+    curses.wrapper(main)
