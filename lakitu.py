@@ -21,10 +21,10 @@ def main(screen):
     curses.init_pair(2, curses.COLOR_MAGENTA, curses.COLOR_MAGENTA)
 
     # connect to pyro
-    lakitu = Pyro4.Proxy("PYRO:obj_4de199546055459ca9b650f3f2d340e0@localhost:44148")
+    lak = Pyro4.Proxy(sys.argv[1])
 
     # load tracklist
-    playlist = lakitu.get_tracklist()
+    playlist = lak.get_tracklist()
     for track in playlist:
         text = track['origin']['title'].encode(code)
         screen.addstr(text, curses.color_pair(0))

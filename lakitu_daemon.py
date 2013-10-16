@@ -19,16 +19,16 @@ import lakitu
 def main():
     """Main"""
     # Initialize Pyro server
-    lakitu = lakitu.daemon.LakituDaemon('user549420240')
+    lak = lakitu.daemon.LakituDaemon('user549420240')
 
     # We are just going to run locally so we can ignore Pyro4 warnings for now.
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         daemon = Pyro4.Daemon()
-        uri = daemon.register(lakitu)
+        uri = daemon.register(lak)
         print("Started Pyro instance at %s" % daemon.locationStr)
         print("uri: %s" % uri)
-        lakitu.play()
+        lak.play()
         daemon.requestLoop()
 
     #pl.set_state(gst.STATE_PAUSED)
