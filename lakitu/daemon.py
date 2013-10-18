@@ -6,6 +6,7 @@ pygst.require('0.10')
 import gst
 import getpass
 import soundcloud
+from lakitu.playlist import PlayList
 
 # LakituDaemon class definition
 class LakituDaemon(object):
@@ -16,7 +17,7 @@ class LakituDaemon(object):
         # Load initial initial tracklist
         feed = self._client.get('/me/activities')
 
-        self._playlist = [x for x in feed.collection if x['type'] == 'track']
+        self._playlist = PlayList(feed)
         self._next_href = feed.next_href
         self._future_href = feed.future_href
 
@@ -37,13 +38,25 @@ class LakituDaemon(object):
 
     def play(self):
         """Begin playing a user's audio stream"""
-        print("Playing " + self._playlist[0]['origin']['title'])
+        self._play(self._playlist.current())
 
-        track = self._client.get(self._playlist[0]['origin']['uri'])
-        stream_url = self._client.get(track.stream_url, allow_redirects=False)
+    def _play(self, track):
+        print("Playing " + track['origin']['title'])
+
+        track_info = self._client.get(track['origin']['uri'])
+        stream_url = self._client.get(track_info.stream_url,
+                                      allow_redirects=False)
 
         #mainloop = gobject.MainLoop()
         pl = gst.element_factory_make("playbin2", "player")
         pl.set_property('uri', stream_url.location)
         pl.set_state(gst.STATE_PLAYING)
+
+    def next(self):
+        """Play the next track"""
+        self._play(self._playlist.next())
+
+    def prev(self):
+        """Play the previous track"""
+        self._play(self._playlist.prev())
 

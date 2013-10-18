@@ -25,10 +25,10 @@ def main(screen):
 
     # load tracklist
     playlist = lak.get_tracklist()
-    for track in playlist:
-        text = track['origin']['title'].encode(code)
-        screen.addstr(text, curses.color_pair(0))
-        #screen.addstr("\n")
+    #for track in playlist:
+    #    text = track['origin']['title'].encode(code)
+    #    screen.addstr(text, curses.color_pair(0))
+    #    #screen.addstr("\n")
 
     #screen.bkgd(curses.color_pair(1))
     screen.refresh()
@@ -38,6 +38,10 @@ def main(screen):
         c = screen.getch()
         if c == ord('n'):
             screen.addstr("Next track", curses.color_pair(2))
+            lak.next()
+        if c == ord('p'):
+            screen.addstr("Previous track", curses.color_pair(2))
+            lak.prev()
         elif c == ord('q'):
             break
 
