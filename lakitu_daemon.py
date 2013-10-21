@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
 A Simple SoundCloud Player (testing)
@@ -25,11 +25,12 @@ def main():
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         daemon = Pyro4.Daemon()
-        uri = daemon.register(lak)
-        print("Started Pyro instance at %s" % daemon.locationStr)
-        print("uri: %s" % uri)
-        lak.play()
-        daemon.requestLoop()
+
+    uri = daemon.register(lak)
+    print("Started Pyro instance at %s" % daemon.locationStr)
+    print("uri: %s" % uri)
+    lak.play()
+    daemon.requestLoop()
 
     #pl.set_state(gst.STATE_PAUSED)
 

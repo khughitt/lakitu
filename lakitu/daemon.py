@@ -1,9 +1,12 @@
 """
 Lakitu daemon class definition
 """
-import pygst
-pygst.require('0.10')
-import gst
+#import pygst
+#pygst.require('0.10')
+#import gst
+import gi
+gi.require_version('Gst', '1.0')
+from gi.repository import GObject, Gst
 import getpass
 import soundcloud
 from lakitu.playlist import PlayList
@@ -13,6 +16,10 @@ class LakituDaemon(object):
     def __init__(self, username):
         """Creates a new Lakitu daemon instance"""
         self._client = self.connect(username)
+
+        # Initialize Gstreamer
+        GObject.threads_init()
+        Gst.init(None)
 
         # Load initial initial tracklist
         feed = self._client.get('/me/activities')
@@ -47,10 +54,12 @@ class LakituDaemon(object):
         stream_url = self._client.get(track_info.stream_url,
                                       allow_redirects=False)
 
-        #mainloop = gobject.MainLoop()
-        pl = gst.element_factory_make("playbin2", "player")
+        #pl = gst.element_factory_make("playbin2", "player")
+        pl = Gst.ElementFactory.make('playbin', None)
         pl.set_property('uri', stream_url.location)
-        pl.set_state(gst.STATE_PLAYING)
+
+        #pl.set_state(gst.STATE_PLAYING)
+        pl.set_state(Gst.State.PLAYING)
 
     def next(self):
         """Play the next track"""
