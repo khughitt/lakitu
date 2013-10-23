@@ -1,49 +1,65 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
 Lakitu SoundCloud client
 2013/10/14
 """
 import sys
-import locale
-import curses
-import curses.wrapper
+import urwid
 import Pyro4.core
 
-def main(screen):
-    """Main"""
-    # Set locale
-    locale.setlocale(locale.LC_ALL, '')
-    code = locale.getpreferredencoding()
+class Lakitu(object):
+    """Lakitu class definition"""
+    def __init__(self, uri):
+        """Create a new Lakitu instance"""
+        # connect to pyro
+        self.lak = Pyro4.Proxy(uri)
 
-    curses.start_color()
-    curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_BLUE) 
-    curses.init_pair(2, curses.COLOR_MAGENTA, curses.COLOR_MAGENTA)
+        # load tracklist
+        playlist = self.lak.get_tracklist()
+        #for track in playlist:
+        #    text = track['origin']['title'].encode(code)
+        #    screen.addstr(text, curses.color_pair(0))
+        #    #screen.addstr("\n")
+        blank = urwid.Divider()
 
-    # connect to pyro
-    lak = Pyro4.Proxy(sys.argv[1])
+        listbox_content = [
+            blank,
+            urwid.Text(u"Entry 1"),
+            blank,
+            urwid.Text(u"Entry 2")
+        ]
 
-    # load tracklist
-    playlist = lak.get_tracklist()
-    #for track in playlist:
-    #    text = track['origin']['title'].encode(code)
-    #    screen.addstr(text, curses.color_pair(0))
-    #    #screen.addstr("\n")
+        header = urwid.AttrWrap(urwid.Text(u"Lakitu"), 'header')
+        listbox = urwid.ListBox(urwid.SimpleListWalker(listbox_content))
+        frame = urwid.Frame(urwid.AttrWrap(listbox, 'body'), header=header)
 
-    #screen.bkgd(curses.color_pair(1))
-    screen.refresh()
+        # Colors
+        palette = [
+            ('body', 'dark magenta', 'light blue', 'standout'),
+            ('reverse', 'light blue', 'dark magenta'),
+            ('header', 'light magenta', 'dark blue', 'bold')
+            ]
 
-    # Main loop
-    while 1:
-        c = screen.getch()
-        if c == ord('n'):
-            screen.addstr("Next track", curses.color_pair(2))
-            lak.next()
-        if c == ord('p'):
-            screen.addstr("Previous track", curses.color_pair(2))
-            lak.prev()
-        elif c == ord('q'):
-            break
+        #filler = urwid.Filler(urwid.Text(u"Lakitu"), 'top')
+        loop = urwid.MainLoop(frame, palette, 
+                              unhandled_input=self._parse_input)
+        loop.run()
+
+    def _parse_input(self, key):
+        """Main execution loop"""
+        c = key.lower()
+
+        if c == 'n':
+            #screen.addstr("Next track", curses.color_pair(2))
+            self.lak.next()
+        if c == 'p':
+            #screen.addstr("Previous track", curses.color_pair(2))
+            self.lak.prev()
+        if c == 'q':
+            raise urwid.ExitMainLoop()
+
 
 if __name__ == "__main__":
-    curses.wrapper(main)
+    uri = sys.argv[1]
+    app = Lakitu(uri)
