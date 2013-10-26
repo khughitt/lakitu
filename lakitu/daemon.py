@@ -46,10 +46,19 @@ class LakituDaemon(object):
         self._play(self._playlist.current())
 
     def _stop(self):
+        self._player.set_state(Gst.State.NULL)
+
+    def _pause(self):
         self._player.set_state(Gst.State.PAUSED)
 
     def _play(self, track):
         print("Playing " + track['origin']['title'])
+        # If currently playing a track, pause first
+        success, state, pending = self._player.get_state(1)
+        if state == Gst.State.PLAYING:
+            self._stop()
+
+        # Load track
         track_info = self._client.get(track['origin']['uri'])
         stream_url = self._client.get(track_info.stream_url,
                                       allow_redirects=False)
