@@ -5,13 +5,17 @@ Lakitu SoundCloud client
 2013/10/14
 """
 import sys
+import os
 import urwid
 import Pyro4.core
 
 class Lakitu(object):
     """Lakitu class definition"""
-    def __init__(self, uri):
+    def __init__(self):
         """Create a new Lakitu instance"""
+        # get uri
+        uri = self._get_uri()
+
         # connect to pyro
         self.lak = Pyro4.Proxy(uri)
 
@@ -59,7 +63,18 @@ class Lakitu(object):
         if c == 'q':
             raise urwid.ExitMainLoop()
 
+    def _get_uri(self):
+        """Retrieves the Pyro instance URI in an accessible location"""
+        # Determine location for lakitu configuration
+        config_dir = (os.getenv('XDG_CONFIG_HOME') or 
+                    os.path.join(os.getenv('HOME'), '.config'))
+        config_dir = os.path.join(config_dir, 'lakitu')
+
+        config_file = os.path.join(config_dir, '.session')
+
+        # retrieve uri
+        with open(config_file, 'r') as fp:
+            return fp.readline()
 
 if __name__ == "__main__":
-    uri = sys.argv[1]
-    app = Lakitu(uri)
+    app = Lakitu()
