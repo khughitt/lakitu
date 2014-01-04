@@ -17,6 +17,10 @@ import Pyro4.core
 import warnings
 import lakitu
 
+# Use pickle to serialize objects
+# http://comments.gmane.org/gmane.comp.python.pyro/2637
+Pyro4.config.SERIALIZERS_ACCEPTED = ['pickle', 'serpent', 'json']
+
 def main():
     """Main"""
     # Initialize Pyro server

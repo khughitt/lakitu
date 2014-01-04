@@ -9,6 +9,10 @@ import os
 import urwid
 import Pyro4.core
 
+# Use pickle to serialize objects
+# http://comments.gmane.org/gmane.comp.python.pyro/2637
+Pyro4.config.SERIALIZER = 'pickle'
+
 class Lakitu(object):
     """Lakitu class definition"""
     def __init__(self):
